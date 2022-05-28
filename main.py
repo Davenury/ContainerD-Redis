@@ -3,7 +3,7 @@ import sys
 
 def main():
 
-    r = redis.Redis(host='localhost', port=6379)
+    r = redis.Redis(host='10.0.0.251', port=6379)
 
     # perform scenario on r
 
