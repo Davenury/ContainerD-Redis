@@ -7,4 +7,4 @@ RUN apt-get update && apt-get install -y \
    iputils-ping \
    iproute2
 
-COPY app.py /
+COPY app.py config.json benchmark.py /

@@ -1,0 +1,16 @@
+{
+    "type": "single_instance",
+    "instances": [
+        {
+            "host": "10.0.0.10",
+            "cpu": 100
+        }
+    ],
+    "benchmark_script": "benchmark.py",
+    "metrics": [
+        "used_memory",
+        "evicted_keys",
+        "keyspace_hits",
+        "keyspace_misses"
+    ]
+}
