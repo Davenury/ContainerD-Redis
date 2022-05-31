@@ -1,0 +1,32 @@
+{
+  "ALL STATS": {
+    "Sets":{
+        "Ops/sec": 1638.84
+        ,"Hits/sec": 0.00
+        ,"Misses/sec": 0.00
+        ,"Latency": 1.12
+        ,"KB/sec": 126.22
+        },
+    "Gets":{
+        "Ops/sec": 16370.41
+        ,"Hits/sec": 0.00
+        ,"Misses/sec": 16370.41
+        ,"Latency": 1.10
+        ,"KB/sec": 637.70
+        },
+    "Waits":{
+        "Ops/sec": 0.00
+        ,"Hits/sec": 0.00
+        ,"Misses/sec": 0.00
+        ,"Latency": 0.00
+        ,"KB/sec": 0.00
+        },
+    "Totals":{
+        "Ops/sec": 18009.25
+        ,"Hits/sec": 0.00
+        ,"Misses/sec": 16370.41
+        ,"Latency": 1.10
+        ,"KB/sec": 763.92
+        }
+    }
+}
