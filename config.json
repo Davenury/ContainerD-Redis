@@ -5,10 +5,12 @@
     ],
     "benchmark": {
         "requests": 100,
-        "threads": 1,
-        "clients": 2
+        "threads": 1
     },
     "cpus": [
-        10
+        10,
+        30,
+        50,
+        100
     ]
 }
