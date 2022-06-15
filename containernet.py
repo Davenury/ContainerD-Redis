@@ -5,6 +5,7 @@ from mininet.link import TCLink
 from mininet.log import info, setLogLevel
 import json
 import sys
+import time
 
 
 setLogLevel('info')
@@ -16,7 +17,7 @@ THREADS = "threads"
 REQUESTS = "requests"
 RATIO = "ratio"
 CPUS = "cpus"
-
+KEY_PATTERN="key-pattern"
 
 net = Containernet(controller=Controller)
 info('Adding controller\n')
@@ -25,12 +26,11 @@ net.addController(f'c0')
 def get_benchmark_values(config):
     benchmark_values = config.get(BENCHMARK, None)
     if benchmark_values is None:
-        return 4, 10000, "1:10"
+        return 4, 10000
     
     threads = benchmark_values.get(THREADS, 4)
     requests = benchmark_values.get(REQUESTS, 10000)
-    ratio = benchmark_values.get(RATIO, "1:10")
-    return threads, requests, ratio
+    return threads, requests
     
 
 def read_config():
@@ -59,9 +59,9 @@ def make_one_cpu(cpu, config):
         net.addLink(redis_server, s1)
 
 
-    client = net.addDocker('client', ip="10.0.0.50", dimage='wrapped_benchmark:latest', network_mode="host")
+    client = net.addDocker(f'client{cpu}', ip="10.0.0.50", dimage='wrapped_benchmark:latest', network_mode="host")
 
-    threads, requests, ratio = get_benchmark_values(config)
+    threads, requests = get_benchmark_values(config)
 
     net.addLink(s1, client)
 
@@ -69,8 +69,17 @@ def make_one_cpu(cpu, config):
 
     net.ping([redis_server, client])
 
-    info(client.cmd(f"memtier_benchmark -s {redis_hosts[0]} -c 1 -t {threads} -n {requests} --ratio {ratio} --hide-histogram --json-out-file=result{cpu}.json"))
-    client.cmd(f'cat result{cpu}.json | curl -H "Content-Type: application/json" -X POST -d "$(</dev/stdin)" http://localhost:8080/{cpu}')
+    info(client.cmd(f"memtier_benchmark -s {redis_hosts[0]} -c 1 -t {threads} -n {requests} --ratio=1:0 --key-pattern=S:S --hide-histogram --json-out-file=result{cpu}.json"))
+    client.cmd(f'cat result{cpu}.json | curl -H "Content-Type: application/json" -X POST -d "$(</dev/stdin)" http://localhost:8080/{cpu}/Sets')
+
+    info(client.cmd(f"memtier_benchmark -s {redis_hosts[0]} -c 1 -t {threads} -n {requests} --ratio=0:1 --key-pattern=S:S --hide-histogram --json-out-file=result{cpu}.json"))
+    client.cmd(f'cat result{cpu}.json | curl -H "Content-Type: application/json" -X POST -d "$(</dev/stdin)" http://localhost:8080/{cpu}/Gets')
+
+    redis_client = net.addDocker(f'redis_client{cpu}', ip="10.0.0.60", dimage='wrapped_client:latest', network_mode="host")
+    net.addLink(s1, redis_client)
+
+    info(redis_client.cmd(f"""echo "operation,ops" > my.csv && redis-benchmark -h {redis_hosts[0]} -q --csv >> my.csv && cat my.csv | python3 -c 'import csv, json, sys; print(json.dumps([dict(r) for r in csv.DictReader(sys.stdin)]))' > result{cpu}.json"""))
+    client.cmd(f'cat result{cpu}.json | curl -H "Content-Type: application/json" -X POST -d "$(</dev/stdin)" http://localhost:8080/redis-benchmark/{cpu}')
 
     net.stop()
 

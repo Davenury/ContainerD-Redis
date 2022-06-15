@@ -9,18 +9,14 @@ app.use(bodyParser.json());
 const stats = ["Ops/sec","Hits/sec","Misses/sec","Latency","KB/sec"]
 
 
-const writeResult = (cpu, result) => {
+const writeResult = (cpu, type, result) => {
 
-    const sets = result["ALL STATS"]["Sets"]
-    const gets = result["ALL STATS"]["Gets"]
+    const sets = result["ALL STATS"][type]
 
     const setsArray = [cpu, ...stats.map(elem => sets[elem])]
-    const getsArray = [cpu, ...stats.map(elem => gets[elem])]
 
     try {
-        fs.appendFileSync('./result.csv', [...setsArray, "sets"].join(','));
-        fs.appendFileSync('./result.csv', "\n");
-        fs.appendFileSync('./result.csv', [...getsArray, "gets"].join(','));
+        fs.appendFileSync('./result.csv', [...setsArray, type].join(','));
         fs.appendFileSync('./result.csv', "\n");
         // file written successfully
     } catch (err) {
@@ -29,9 +25,21 @@ const writeResult = (cpu, result) => {
 
 }
 
+const writeRedisBenchmarkResult = (cpu, result) => {
+    fs.writeFileSync(`./result${cpu}.csv`, "operation,ops\n")
+    result.forEach(element => {
+        fs.writeFileSync(`./result${cpu}.csv`, `${element["operation"]},${element["ops"]}\n`)
+    });
+}
 
-app.post('/:cpu', (req, res) => {
-    writeResult(req.params["cpu"], req.body);
+
+app.post('/:cpu/:type', (req, res) => {
+    writeResult(req.params["cpu"], req.params["type"], req.body);
+    res.sendStatus(200);
+});
+
+app.post('/redis-benchmark/:cpu', (req, res) => {
+    writeRedisBenchmarkResult(req.params["cpu"], req.body);
     res.sendStatus(200);
 });
 
