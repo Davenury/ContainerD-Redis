@@ -1,5 +1,0 @@
-CPU Percentage,Ops/sec,Hits/sec,Misses/sec,Latency,KB/sec,Operation
-10,416.96,0,0,2.37,30.05,Sets
-10,7040.77,7040.77,0,0.14,473.05,Gets
-30,7415.65,0,0,0.13,534.45,Sets
-30,1265.6,1265.6,0,0.76,85.03,Gets

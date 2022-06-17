@@ -32,7 +32,7 @@ done;
 NODE_DOCKER_CONTAINER=`sudo docker ps | grep node_app | awk '{print $1}'`
 REDIS_CONTAINER_ID=`sudo docker ps | grep redis-server | awk '{print $1}'`
 
-sudo docker cp $NODE_DOCKER_CONTAINER:/app/. .
+sudo docker cp $NODE_DOCKER_CONTAINER:/app/result/. .
 
 sudo docker kill `sudo docker ps -q`
 

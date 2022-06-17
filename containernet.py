@@ -54,8 +54,8 @@ def prepare_cluster():
     for idx, host in enumerate(redis_hosts):
         os.makedirs(str(7000+idx), mode=0o755, exist_ok=True)
 
-        with open('redis.conf', "w+") as f:
-            f.write(f"port {7000+idx} cluster-enabled yes cluster-config-file nodes.conf cluster-node-timeout 5000 append-only yes bind {host}")
+        with open(f'{7000+idx}/redis.conf', "w+") as f:
+            f.write(f"port {7000+idx} cluster-enabled yes cluster-config-file nodes.conf cluster-node-timeout 5000 append-only yes\n bind {host}\n")
 
 
 def make_one_cpu(cpu, mode, config):
@@ -65,13 +65,14 @@ def make_one_cpu(cpu, mode, config):
 
     s1 = net.addSwitch(f's1')
 
-    if config.get["type"] == "single_instance":
+    if config["type"] == "single_instance":
         redis_server = net.addDocker(f'redis', ip=redis_hosts[0], dimage='wrapped_redis:latest', ports=[6379], dcmd="redis-server", cpu_quota=cpu*1000)
         net.addLink(redis_server, s1)
-    elif config.get["type"] == "cluster":
+    elif config["type"] == "cluster":
         prepare_cluster()
         for idx, host in enumerate(redis_hosts):
-            redis_server = net.addDocker(f'redis{idx}', ip=host, dimage='wrapped_redis:latest', ports=[7000+idx], dcmd="redis-server /usr/local/etc/redis/redis.conf", volumes=[f"{os.getcwd()}/{7000+idx}/redis.conf:/usr/local/etc/redis/redis.conf"], cpu_quota=cpu*1000, network_mode="host")
+            redis_server = net.addDocker(f'redis{idx}', ip=host, dimage='wrapped_redis:latest', ports=[7000+idx], dcmd="cat /usr/local/etc/redis/redis.conf",  cpu_quota=cpu*1000, network_mode="host")
+            info("git")
             net.addLink(redis_server, s1)
 
 
@@ -91,7 +92,7 @@ def make_one_cpu(cpu, mode, config):
 
     net.start()
 
-    if config.get["type"] == "cluster":
+    if config["type"] == "cluster":
         cluster_string = ""
         for idx, host in enumerate(redis_hosts):
             cluster_string += f"{host}:{7000+idx} "
