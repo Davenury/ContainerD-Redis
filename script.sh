@@ -11,19 +11,21 @@ sudo docker build -f Dockerfile.client -t wrapped_client .
 sudo docker run --rm -d -p 8080:8080 node_app
 
 for cpu in $(cat config.json | jq '.cpus' | jq '.[]' -c); do
+    for mode in 1; do
 
-    sudo docker run --name containernet -d --rm -it --privileged --pid='host' -v /var/run/docker.sock:/var/run/docker.sock containernet/containernet
+        sudo docker run --name containernet -d --rm -it --privileged --pid='host' -v /var/run/docker.sock:/var/run/docker.sock containernet/containernet
 
-    CONTAINERNET_CONTAINER_ID=`sudo docker ps | grep containernet | awk '{print $1}'`
+        CONTAINERNET_CONTAINER_ID=`sudo docker ps | grep containernet | awk '{print $1}'`
 
-    sudo docker cp containernet.py $CONTAINERNET_CONTAINER_ID:/containernet
-    sudo docker cp config.json $CONTAINERNET_CONTAINER_ID:/containernet
+        sudo docker cp containernet.py $CONTAINERNET_CONTAINER_ID:/containernet
+        sudo docker cp config.json $CONTAINERNET_CONTAINER_ID:/containernet
 
-    sudo docker exec -t $CONTAINERNET_CONTAINER_ID sudo python3 containernet.py $cpu
+        sudo docker exec -t $CONTAINERNET_CONTAINER_ID sudo python3 containernet.py $cpu $mode
 
-    sudo docker kill $CONTAINERNET_CONTAINER_ID
+        sudo docker kill $CONTAINERNET_CONTAINER_ID
 
-    sleep 2
+        sleep 2
+    done;
 
 done;
 
