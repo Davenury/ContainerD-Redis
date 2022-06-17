@@ -59,15 +59,21 @@ def make_one_cpu(cpu, config):
         net.addLink(redis_server, s1)
 
 
+    info("Adding client\n")
     client = net.addDocker(f'client{cpu}', ip="10.0.0.50", dimage='wrapped_benchmark:latest', network_mode="host")
 
     threads, requests = get_benchmark_values(config)
 
+    info("Adding link \n")
     net.addLink(s1, client)
+
+    redis_client = net.addDocker(f'mark{cpu}', ip="10.0.0.60", dimage='wrapped_client:latest', network_mode="host")
+    net.addLink(s1, redis_client)
 
     net.start()
 
     net.ping([redis_server, client])
+    net.ping([redis_client, redis_server])
 
     info(client.cmd(f"memtier_benchmark -s {redis_hosts[0]} -c 1 -t {threads} -n {requests} --ratio=1:0 --key-pattern=S:S --hide-histogram --json-out-file=result{cpu}.json"))
     client.cmd(f'cat result{cpu}.json | curl -H "Content-Type: application/json" -X POST -d "$(</dev/stdin)" http://localhost:8080/{cpu}/Sets')
@@ -75,11 +81,8 @@ def make_one_cpu(cpu, config):
     info(client.cmd(f"memtier_benchmark -s {redis_hosts[0]} -c 1 -t {threads} -n {requests} --ratio=0:1 --key-pattern=S:S --hide-histogram --json-out-file=result{cpu}.json"))
     client.cmd(f'cat result{cpu}.json | curl -H "Content-Type: application/json" -X POST -d "$(</dev/stdin)" http://localhost:8080/{cpu}/Gets')
 
-    redis_client = net.addDocker(f'redis_client{cpu}', ip="10.0.0.60", dimage='wrapped_client:latest', network_mode="host")
-    net.addLink(s1, redis_client)
-
     info(redis_client.cmd(f"""echo "operation,ops" > my.csv && redis-benchmark -h {redis_hosts[0]} -q --csv >> my.csv && cat my.csv | python3 -c 'import csv, json, sys; print(json.dumps([dict(r) for r in csv.DictReader(sys.stdin)]))' > result{cpu}.json"""))
-    client.cmd(f'cat result{cpu}.json | curl -H "Content-Type: application/json" -X POST -d "$(</dev/stdin)" http://localhost:8080/redis-benchmark/{cpu}')
+    redis_client.cmd(f'cat result{cpu}.json | curl -H "Content-Type: application/json" -X POST -d "$(</dev/stdin)" http://localhost:8080/redis-benchmark/{cpu}')
 
     net.stop()
 

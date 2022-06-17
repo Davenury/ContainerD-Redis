@@ -16,8 +16,8 @@ const writeResult = (cpu, type, result) => {
     const setsArray = [cpu, ...stats.map(elem => sets[elem])]
 
     try {
-        fs.appendFileSync('./result.csv', [...setsArray, type].join(','));
-        fs.appendFileSync('./result.csv', "\n");
+        fs.appendFileSync('./results/result.csv', [...setsArray, type].join(','));
+        fs.appendFileSync('./results/result.csv', "\n");
         // file written successfully
     } catch (err) {
         console.error(err);
@@ -26,9 +26,9 @@ const writeResult = (cpu, type, result) => {
 }
 
 const writeRedisBenchmarkResult = (cpu, result) => {
-    fs.writeFileSync(`./result${cpu}.csv`, "operation,ops\n")
+    fs.writeFileSync(`./results/redis_result${cpu}.csv`, "operation,ops\n")
     result.forEach(element => {
-        fs.writeFileSync(`./result${cpu}.csv`, `${element["operation"]},${element["ops"]}\n`)
+        fs.writeFileSync(`./results/redis_result${cpu}.csv`, `${element["operation"]},${element["ops"]}\n`)
     });
 }
 
@@ -45,8 +45,9 @@ app.post('/redis-benchmark/:cpu', (req, res) => {
 
 app.listen(8080, () => {
     try {
-        fs.writeFileSync("./result.csv", ["CPU Percentage", ...stats, "Operation"].join(','));
-        fs.appendFileSync('./result.csv', "\n");
+        fs.mkdirSync("results")
+        fs.writeFileSync("./results/result.csv", ["CPU Percentage", ...stats, "Operation"].join(','));
+        fs.appendFileSync('./results/result.csv', "\n");
     } catch(err) {
         console.error(err)
     }
