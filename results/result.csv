@@ -1,7 +1,11 @@
-CPU Percentage,Ops/sec,Hits/sec,Misses/sec,Latency,KB/sec,Operation
-50,2725.91,0,0,0.35,196.46,Sets
-50,4939,4939,0,0.19,331.84,Gets
-70,2167.6,0,0,0.44,156.22,Sets
-70,1887.72,1887.72,0,0.5,126.83,Gets
-100,3457.46,0,0,0.26,249.18,Sets
-100,7693.49,7693.49,0,0.12,516.91,Gets
+CPU Percentage,Ops/sec,Hits/sec,Misses/sec,Latency,KB/sec,Operation,Instance type
+10,6858.24,0,0,0.14,494.28,Sets,single_instance
+10,512.75,512.75,0,1.92,34.45,Gets,single_instance
+30,2941.96,0,0,0.33,212.03,Sets,single_instance
+30,2976.99,2976.99,0,0.32,200.02,Gets,single_instance
+50,5648.76,0,0,0.17,407.11,Sets,single_instance
+50,8499.07,8499.07,0,0.11,571.03,Gets,single_instance
+70,3929.74,0,0,0.24,283.22,Sets,single_instance
+70,6897.03,6897.03,0,0.14,463.39,Gets,single_instance
+100,4642.74,0,0,0.21,334.6,Sets,single_instance
+100,6782.88,6782.88,0,0.14,455.72,Gets,single_instance

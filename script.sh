@@ -20,7 +20,7 @@ for cpu in $(cat config.json | jq '.cpus' | jq '.[]' -c); do
         sudo docker cp containernet.py $CONTAINERNET_CONTAINER_ID:/containernet
         sudo docker cp config.json $CONTAINERNET_CONTAINER_ID:/containernet
 
-        sudo docker exec -t $CONTAINERNET_CONTAINER_ID sudo python3 containernet.py $cpu $mode
+        sudo docker exec -t $CONTAINERNET_CONTAINER_ID sudo python3 containernet.py $cpu $mode $(pwd)
 
         sudo docker kill $CONTAINERNET_CONTAINER_ID
 
@@ -32,7 +32,9 @@ done;
 NODE_DOCKER_CONTAINER=`sudo docker ps | grep node_app | awk '{print $1}'`
 REDIS_CONTAINER_ID=`sudo docker ps | grep redis-server | awk '{print $1}'`
 
-sudo docker cp $NODE_DOCKER_CONTAINER:/app/result/. .
+mkdir -p results
+
+sudo docker cp $NODE_DOCKER_CONTAINER:/app/results/. results/
 
 sudo docker kill `sudo docker ps -q`
 
